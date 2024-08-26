@@ -1,0 +1,13 @@
+matplotlib
+torchvision
+tqdm
+onnx
+onnxoptimizer
+onnxsim
+di-toolkit
+tensorboard
+accelerate
+natsort
+tabulate
+torch
+speechbrain

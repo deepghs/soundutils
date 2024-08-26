@@ -1,0 +1,8 @@
+hbutils>=0.10.1
+numpy<2
+scikit-learn
+huggingface_hub>=0.24.0
+tqdm
+pandas
+scipy
+hfutils>=0.4.1
