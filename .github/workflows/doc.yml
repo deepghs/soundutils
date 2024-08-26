@@ -46,6 +46,18 @@ jobs:
           python -m pip install -r requirements.txt
           python -m pip install -r requirements-model.txt
           python -m pip install -r requirements-doc.txt
+      - name: Prepare assets
+        uses: nick-fields/retry@v2
+        env:
+          CI: 'true'
+          HF_TOKEN: {{ secrets.HF_TOKEN }}
+        with:
+          shell: bash
+          timeout_minutes: 20
+          max_attempts: 5
+          retry_on: any
+          command: |
+            make assets
       - name: Generate the contents
         if: ${{ github.event_name == 'push' }}
         env:
@@ -105,6 +117,18 @@ jobs:
           dot -V
           python -m pip install -r requirements.txt
           python -m pip install -r requirements-doc.txt
+      - name: Prepare assets
+        uses: nick-fields/retry@v2
+        env:
+          CI: 'true'
+          HF_TOKEN: {{ secrets.HF_TOKEN }}
+        with:
+          shell: bash
+          timeout_minutes: 20
+          max_attempts: 5
+          retry_on: any
+          command: |
+            make assets
       - name: Sync from ref
         if: ${{ github.event_name == 'push' }}
         run: |

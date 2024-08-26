@@ -1,6 +1,7 @@
 .PHONY: docs test unittest resource
 
 PYTHON := $(shell which python)
+HFUTILS ?= $(PYTHON) -m hfutils
 
 PROJ_DIR      := .
 DOC_DIR       := ${PROJ_DIR}/docs
@@ -17,7 +18,7 @@ RANGE_DIR      ?= .
 RANGE_TEST_DIR := ${TEST_DIR}/${RANGE_DIR}
 RANGE_SRC_DIR  := ${SRC_DIR}/${RANGE_DIR}
 
-GAMES ?= arknights fgo genshin girlsfrontline azurlane
+ASSETS_REPO_ID ?= deepghs/soundutils_unittest
 
 COV_TYPES ?= xml term-missing
 
@@ -41,3 +42,8 @@ docs:
 	$(MAKE) -C "${DOC_DIR}" build
 pdocs:
 	$(MAKE) -C "${DOC_DIR}" prod
+
+assets:
+	$(HFUTILS) download -r ${ASSETS_REPO_ID} -d . -o ${TESTFILE_DIR}/assets
+assets_upload:
+	$(HFUTILS) upload -r ${ASSETS_REPO_ID} -d . -i ${TESTFILE_DIR}/assets -c

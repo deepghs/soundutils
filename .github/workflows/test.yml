@@ -88,6 +88,18 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-model.txt
           pip install -r requirements-test.txt
+      - name: Prepare assets
+        uses: nick-fields/retry@v2
+        env:
+          CI: 'true'
+          HF_TOKEN: {{ secrets.HF_TOKEN }}
+        with:
+          shell: bash
+          timeout_minutes: 20
+          max_attempts: 5
+          retry_on: any
+          command: |
+            make assets
       - name: Test the basic environment
         shell: bash
         run: |

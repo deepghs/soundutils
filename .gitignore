@@ -1217,8 +1217,8 @@ fabric.properties
 !/resource/yolort/Makefile
 !/test/testfile/**/*
 !/zoo/testfile/**/*
-/test/testfile/dataset
-/zoo/testfile/dataset
+/test/testfile/assets
+/zoo/testfile/assets
 /.train
 *.pt
 /runs
