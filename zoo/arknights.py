@@ -161,6 +161,7 @@ def sync(lang):
                         'time': sound.time,
                         'sample_rate': sound.sample_rate,
                         'frames': sound.samples,
+                        'channels': sound.channels,
                         'filename': item['id'] + '.wav',
                         'mimetype': mimetype,
                         'file_size': os.path.getsize(dst_filename),
