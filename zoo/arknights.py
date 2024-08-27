@@ -91,8 +91,8 @@ def sync(lang):
     hf_client = get_hf_client()
 
     if not hf_client.repo_exists(repo_id=repository, repo_type='dataset'):
-        hf_client.create_repo(repo_id=repository, repo_type='dataset', private=True)
-        hf_client.update_repo_visibility(repo_id=repository, repo_type='dataset', private=True)
+        hf_client.create_repo(repo_id=repository, repo_type='dataset', private=False)
+        hf_client.update_repo_visibility(repo_id=repository, repo_type='dataset', private=False)
         attr_lines = hf_fs.read_text(f'datasets/{repository}/.gitattributes').splitlines(keepends=False)
         attr_lines.append('*.json filter=lfs diff=lfs merge=lfs -text')
         attr_lines.append('*.csv filter=lfs diff=lfs merge=lfs -text')
