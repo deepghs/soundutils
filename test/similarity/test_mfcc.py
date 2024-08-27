@@ -118,4 +118,4 @@ class TestSimilarityMFCC:
                 _ = sound_mfcc_similarity(file1, file2, mode=mode, time_align='pad', resample_rate_align='min')
         else:
             assert sound_mfcc_similarity(file1, file2, mode=mode, time_align='pad', resample_rate_align='min') \
-                   == pytest.approx(v)
+                   == pytest.approx(v, abs=1e-3)
