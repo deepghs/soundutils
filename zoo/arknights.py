@@ -219,7 +219,10 @@ def sync(lang):
             print(f'Only the voices with strictly one voice actor is maintained here to '
                   f'reduce the noise of this dataset.', file=f)
             print(f'', file=f)
-            print(f'{plural_word(len(df_rows), "record")} in total.', file=f)
+
+            print(f'{plural_word(len(df_rows), "record")}, '
+                  f'{df_rows["time"].sum() / 60 / 60:.3g} hours in total. '
+                  f'Average duration is approximately {df_rows["time"].mean():.3g}s.', file=f)
             print(f'', file=f)
             df_shown = df_rows[:50][
                 ['id', 'char_id', 'voice_actor_name', 'voice_title', 'voice_text',
