@@ -79,7 +79,7 @@ def get_text_for_lang(lang):
                 'voice_title': value['voiceTitle'],
                 'voice_type': value['voiceType'],
                 'word_key': value['wordKey'],
-                'file_url': f'https://torappu.prts.wiki/assets/audio/{vmap[lang]}/{value["charId"]}/{value["voiceId"].lower()}.mp3',
+                'file_url': f'https://torappu.prts.wiki/assets/audio/{vmap[lang]}/{value["charId"]}/{value["voiceId"].lower()}.wav',
             })
 
     return pd.DataFrame(rows)
@@ -144,16 +144,16 @@ def sync(lang):
                     pg.update()
 
             for item in df_download.to_dict('records'):
-                dst_filename = os.path.join(td, item['id'] + '.mp3')
+                dst_filename = os.path.join(td, item['id'] + '.wav')
                 tp.submit(_download, item, dst_filename)
 
             tp.shutdown(wait=True)
 
             for item in tqdm(df_download.to_dict('records'), desc='Adding'):
-                dst_filename = os.path.join(td, item['id'] + '.mp3')
+                dst_filename = os.path.join(td, item['id'] + '.wav')
                 if os.path.exists(dst_filename):
                     logging.info(f'Adding file {item["id"]!r} ...')
-                    tar.add(dst_filename, item['id'] + '.mp3')
+                    tar.add(dst_filename, item['id'] + '.wav')
                     mimetype, _ = mimetypes.guess_type(dst_filename)
                     sound = Sound.open(dst_filename)
                     rows.append({
@@ -161,7 +161,7 @@ def sync(lang):
                         'time': sound.time,
                         'sample_rate': sound.sample_rate,
                         'frames': sound.samples,
-                        'filename': item['id'] + '.mp3',
+                        'filename': item['id'] + '.wav',
                         'mimetype': mimetype,
                         'file_size': os.path.getsize(dst_filename),
                     })
