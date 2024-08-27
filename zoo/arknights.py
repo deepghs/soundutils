@@ -47,7 +47,7 @@ def get_cv_list(lang):
 
     mps = {}
     for key, value in d["voiceLangDict"].items():
-        if value['charId'] == key and key.startswith('char_') and mt[lang] in value['dict'] and \
+        if key.startswith('char_') and mt[lang] in value['dict'] and \
                 len(value['dict'][mt[lang]]['cvName']) == 1:
             mps[key] = value['dict'][mt[lang]]['cvName'][0]
 
@@ -66,7 +66,7 @@ def get_text_for_lang(lang):
         'kr': 'voice_kr',
     }
     for key, value in d["charWords"].items():
-        if value['wordKey'] not in cvmap:
+        if value['wordKey'] in cvmap:
             rows.append({
                 'id': key,
                 'char_id': value['charId'],
