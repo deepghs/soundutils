@@ -1,9 +1,13 @@
 import os
+from datetime import datetime, timedelta
 from typing import Tuple, Optional, Union
 
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 import numpy as np
 import soundfile
 from hbutils.string import plural_word
+from matplotlib.ticker import FuncFormatter
 from scipy import signal
 
 SoundTyping = Union[str, os.PathLike, 'Sound']
@@ -98,14 +102,16 @@ class Sound:
         return cls(data, sample_rate)
 
     def to_numpy(self) -> Tuple[np.ndarray, int]:
+        # dump data to numpy format
+        # it has been 100% aligned with torchaudio's loading result
         return self._to_numpy().T, self._sample_rate
 
     @classmethod
-    def open(cls, sound_file: str) -> 'Sound':
+    def open(cls, sound_file: Union[str, os.PathLike]) -> 'Sound':
         data, sample_rate = soundfile.read(sound_file)
         return cls(data, sample_rate)
 
-    def save(self, sound_file: str):
+    def save(self, sound_file: Union[str, os.PathLike]):
         soundfile.write(sound_file, self._data, self._sample_rate)
 
     @classmethod
@@ -116,3 +122,29 @@ class Sound:
             return cls.open(sound)
         else:
             raise TypeError(f'Unknown sound type - {sound!r}.')
+
+    def plot(self, ax=None, title: Optional[str] = None):
+        times = np.arange(self.samples) / float(self._sample_rate)
+        base_time = datetime(1970, 1, 1)
+        times = [base_time + timedelta(seconds=t) for t in times]
+        times = mdates.date2num(times)
+
+        ax = ax or plt.gca()
+        data = self._to_numpy()
+        for cid in range(self.channels):
+            ax.plot(times, data[:, cid], label=f'Channel #{cid}', alpha=0.5)
+
+        def _fmt_time(x, pos):
+            dt, _ = mdates.num2date(x), pos
+            return dt.strftime('%H:%M:%S') + f'.{int(dt.microsecond / 1000):03d}'
+
+        ax.xaxis.set_major_formatter(FuncFormatter(_fmt_time))
+        locator = mdates.AutoDateLocator(minticks=5, maxticks=10)
+        ax.xaxis.set_major_locator(locator)
+
+        ax.set_xlabel('Time [hh:mm:ss.mmm]')
+        ax.set_ylabel('Amplitude')
+        ax.set_title(f'{title or "Audio Signal"}\n'
+                     f'Channels: {self.channels}, Sample Rate: {self._sample_rate}\n'
+                     f'Time: {self.time:.3f}s ({plural_word(self.samples, "frame")})\n')
+        ax.legend()

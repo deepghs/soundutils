@@ -6,13 +6,13 @@ from soundutils.data import SoundTyping
 from .base import _align_sounds
 
 
-def sound_correlation(
+def sound_pearson_similarity(
         sound1: SoundTyping, sound2: SoundTyping,
         resample_rate_align: Literal['max', 'min', 'none'] = 'none',
-        time_align: Literal['pad', 'resample', 'none'] = 'none',
+        time_align: Literal['none', 'pad', 'prefix', 'resample_max', 'resample_min'] = 'none',
         channels_align: Literal['none'] = 'none',
 ) -> float:
-    data1, data2 = _align_sounds(
+    (data1, sr1), (data2, sr2) = _align_sounds(
         sound1=sound1,
         sound2=sound2,
         resample_rate_align=resample_rate_align,

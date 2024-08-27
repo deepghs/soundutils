@@ -26,9 +26,9 @@ class SoundLengthNotMatch(SoundAlignError):
 def _align_sounds(
         sound1: SoundTyping, sound2: SoundTyping,
         resample_rate_align: Literal['max', 'min', 'none'] = 'none',
-        time_align: Literal['pad', 'resample', 'none'] = 'none',
-        channels_align: Literal['none', 'noncheck'] = 'none',
-) -> Tuple[np.ndarray, np.ndarray]:
+        time_align: Literal['none', 'noncheck', 'pad', 'prefix', 'resample_max', 'resample_min'] = 'none',
+        channels_align: Literal['none'] = 'none',
+) -> Tuple[Tuple[np.ndarray, int], Tuple[np.ndarray, int]]:
     sound1, sound2 = Sound.load(sound1), Sound.load(sound2)
     if channels_align == 'none':
         if sound1.channels != sound2.channels:
@@ -66,11 +66,40 @@ def _align_sounds(
                                       f'{data1.shape[-1] / sr1:.3f}s ({plural_word(data1.shape[-1], "frame")}) vs '
                                       f'{data2.shape[-1] / sr2:.3f}s ({plural_word(data2.shape[-1], "frame")}).')
     else:
-        # shape of data1 and data2: (channels, frames)
-        # TODO: support 3 modes of time_align:
-        # * 'pad', pad the sound data with fewer frames with all 0 constants
-        # * 'resample_max', resample the shorter sound data to the longer one's frames
-        # * 'resample_min', resample the longer sound data to the shorter one's frames
-        raise NotImplementedError
+        if time_align == 'pad':
+            # Pad the shorter sound with zeros
+            max_frames = max(data1.shape[-1], data2.shape[-1])
+            if data1.shape[-1] < max_frames:
+                pad_width = ((0, 0), (0, max_frames - data1.shape[-1]))
+                data1 = np.pad(data1, pad_width, mode='constant')
+            elif data2.shape[-1] < max_frames:
+                pad_width = ((0, 0), (0, max_frames - data2.shape[-1]))
+                data2 = np.pad(data2, pad_width, mode='constant')
 
-    return data1, data2
+        elif time_align == 'prefix':
+            # Crop the longer sound's prefix
+            min_frames = min(data1.shape[-1], data2.shape[-1])
+            data1 = data1[:, :min_frames]
+            data2 = data2[:, :min_frames]
+
+        elif time_align == 'resample_max':
+            # Resample the shorter sound to match the longer one
+            max_frames = max(data1.shape[-1], data2.shape[-1])
+            if data1.shape[-1] < max_frames:
+                data1 = resample(data1, max_frames, axis=-1)
+            elif data2.shape[-1] < max_frames:
+                data2 = resample(data2, max_frames, axis=-1)
+
+        elif time_align == 'resample_min':
+            # Resample the longer sound to match the shorter one
+            min_frames = min(data1.shape[-1], data2.shape[-1])
+            if data1.shape[-1] > min_frames:
+                data1 = resample(data1, min_frames, axis=-1)
+            elif data2.shape[-1] > min_frames:
+                data2 = resample(data2, min_frames, axis=-1)
+
+        else:
+            raise ValueError(f'Invalid time align mode - {time_align!r}.')
+
+    # shape: (channels, frames)
+    return (data1, sr1), (data2, sr2)
