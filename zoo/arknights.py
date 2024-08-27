@@ -1,9 +1,11 @@
 import json
+import mimetypes
 import os
 import tarfile
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 
+import numpy as np
 import pandas as pd
 import requests
 from ditk import logging
@@ -101,11 +103,18 @@ def sync(lang):
         )
 
     df = get_text_for_lang(lang)
-    session = get_requests_session(max_retries=5, timeout=10.0)
+    session = get_requests_session(max_retries=5, timeout=10)
 
-    if hf_fs.exists(f'datasets/{repository}/exist_ids.json'):
-        exist_ids = set(json.loads(hf_fs.read_text(f'datasets/{repository}/exist_ids.json')))
+    if hf_fs.exists(f'datasets/{repository}/table.parquet'):
+        df_rows = pd.read_parquet(hf_client.hf_hub_download(
+            repo_id=repository,
+            repo_type='dataset',
+            filename='table.parquet'
+        )).replace(np.nan, None)
+        rows = df_rows.to_dict('records')
+        exist_ids = set(df_rows['id'])
     else:
+        rows = []
         exist_ids = set()
 
     with TemporaryDirectory() as upload_dir:
@@ -140,17 +149,30 @@ def sync(lang):
 
             tp.shutdown(wait=True)
 
-            for item in df_download.to_dict('records'):
+            for item in tqdm(df_download.to_dict('records'), desc='Adding'):
                 dst_filename = os.path.join(td, item['id'] + '.mp3')
                 if os.path.exists(dst_filename):
                     logging.info(f'Adding file {item["id"]!r} ...')
                     tar.add(dst_filename, item['id'] + '.mp3')
+                    mimetype, _ = mimetypes.guess_type(dst_filename)
+                    sound = Sound.open(dst_filename)
+                    rows.append({
+                        **item,
+                        'time': sound.time,
+                        'sample_rate': sound.sample_rate,
+                        'frames': sound.samples,
+                        'filename': item['id'] + '.mp3',
+                        'mimetype': mimetype,
+                        'file_size': os.path.getsize(dst_filename),
+                    })
                     exist_ids.add(item['id'])
                 else:
                     logging.warning(f'Voice file {item["id"]!r} not found, skipped.')
 
         parquet_file = os.path.join(upload_dir, 'table.parquet')
-        df.to_parquet(parquet_file, engine='pyarrow', index=False)
+        df_rows = pd.DataFrame(rows)
+        df_rows = df_rows.sort_values(by=['voice_actor_name', 'char_id', 'id'], ascending=True)
+        df_rows.to_parquet(parquet_file, engine='pyarrow', index=False)
 
         tar_create_index_for_directory(upload_dir)
 
@@ -172,7 +194,7 @@ def sync(lang):
             print('- audio', file=f)
             print('- text', file=f)
             print('size_categories:', file=f)
-            print(f'- {number_to_tag(len(df))}', file=f)
+            print(f'- {number_to_tag(len(df_rows))}', file=f)
             print('---', file=f)
             print('', file=f)
 
@@ -181,10 +203,11 @@ def sync(lang):
             print(f'This is the {lang.upper()} voice-text dataset for arknights playable characters. '
                   f'Very useful for fine-tuning or evaluating ASR/ASV models.', file=f)
             print(f'', file=f)
-            print(f'{plural_word(len(df), "record")} in total.', file=f)
+            print(f'{plural_word(len(df_rows), "record")} in total.', file=f)
             print(f'', file=f)
-            df_shown = df[:50][
-                ['id', 'char_id', 'voice_actor_name', 'voice_title', 'voice_text', 'file_url']
+            df_shown = df_rows[:50][
+                ['id', 'char_id', 'voice_actor_name', 'voice_title', 'voice_text',
+                 'time', 'sample_rate', 'file_size', 'filename', 'mimetype', 'file_url']
             ]
             print(df_shown.to_markdown(index=False), file=f)
             print(f'', file=f)
@@ -194,7 +217,7 @@ def sync(lang):
             repo_type='dataset',
             local_directory=upload_dir,
             path_in_repo='.',
-            message=f'Sync {plural_word(len(df), "record")} for arknights {lang} voices'
+            message=f'Sync {plural_word(len(df_rows), "record")} for arknights {lang} voices'
         )
 
 
