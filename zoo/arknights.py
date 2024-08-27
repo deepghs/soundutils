@@ -115,6 +115,7 @@ def sync(lang):
     else:
         rows = []
         exist_ids = set()
+    original_count = len(rows)
 
     with TemporaryDirectory() as upload_dir:
         tar_file = os.path.join(upload_dir, 'voices.tar')
@@ -213,7 +214,7 @@ def sync(lang):
             repo_type='dataset',
             local_directory=upload_dir,
             path_in_repo='.',
-            message=f'Sync {plural_word(len(df_rows), "record")} for arknights {lang} voices'
+            message=f'Sync {plural_word(len(df_rows) - original_count, "new record")} for arknights {lang} voices'
         )
 
 
