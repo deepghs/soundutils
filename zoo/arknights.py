@@ -1,4 +1,3 @@
-import json
 import mimetypes
 import os
 import tarfile
@@ -175,9 +174,6 @@ def sync(lang):
         df_rows.to_parquet(parquet_file, engine='pyarrow', index=False)
 
         tar_create_index_for_directory(upload_dir)
-
-        with open(os.path.join(upload_dir, 'exist_ids.json'), 'w') as f:
-            json.dump(sorted(exist_ids), f)
 
         with open(os.path.join(upload_dir, 'README.md'), 'w') as f:
             print('---', file=f)
