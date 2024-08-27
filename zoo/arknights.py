@@ -216,6 +216,9 @@ def sync(lang):
             print(f'This is the {lang.upper()} voice-text dataset for arknights playable characters. '
                   f'Very useful for fine-tuning or evaluating ASR/ASV models.', file=f)
             print(f'', file=f)
+            print(f'Only the voices with strictly one voice actor is maintained here to '
+                  f'reduce the noise of this dataset.', file=f)
+            print(f'', file=f)
             print(f'{plural_word(len(df_rows), "record")} in total.', file=f)
             print(f'', file=f)
             df_shown = df_rows[:50][
