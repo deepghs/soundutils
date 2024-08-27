@@ -87,6 +87,14 @@ def get_text_for_lang(lang):
     return pd.DataFrame(rows)
 
 
+_DOCTOR_NAME = {
+    'zh': '博士',
+    'kr': '박사',
+    'jp': 'ドクター',
+    'en': 'doctor',
+}
+
+
 def sync(lang):
     repository = f'deepghs/arknights_voices_{lang}'
     hf_fs = get_hf_fs()
@@ -160,6 +168,7 @@ def sync(lang):
                     sound = Sound.open(dst_filename)
                     rows.append({
                         **item,
+                        'voice_text': item['voice_text'].replace('{@nickname}', _DOCTOR_NAME[lang]),
                         'time': sound.time,
                         'sample_rate': sound.sample_rate,
                         'frames': sound.samples,
@@ -180,13 +189,14 @@ def sync(lang):
         tar_create_index_for_directory(upload_dir)
 
         with open(os.path.join(upload_dir, 'README.md'), 'w') as f:
+            _ls = {'kr': 'ko', 'jp': 'ja'}
             print('---', file=f)
             print('license: other', file=f)
             print('task_categories:', file=f)
             print('- automatic-speech-recognition', file=f)
             print('- audio-classification', file=f)
             print('language:', file=f)
-            print(f'- {lang}', file=f)
+            print(f'- {_ls.get(lang, lang)}', file=f)
             print('tags:', file=f)
             print('- voice', file=f)
             print('- anime', file=f)
