@@ -44,9 +44,6 @@ class Sound:
         else:
             return self._data.shape[-1]
 
-    def getchannels(self, channels):
-        return self._to_numpy()[:, channels]
-
     def resample(self, sample_rate) -> 'Sound':
         if sample_rate == self._sample_rate:
             return self
@@ -97,7 +94,7 @@ class Sound:
             raise ValueError(f'Invalid sound data shape - {data.shape!r}.')
 
         data = data.T
-        if data.shape[0] == 1:
+        if data.shape[1] == 1:
             data = data[:, 0]
         return cls(data, sample_rate)
 
