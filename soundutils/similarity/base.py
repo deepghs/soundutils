@@ -53,11 +53,11 @@ def _align_sounds(
 
         if sr1 != c_sr:
             num_samples = int(sound1.time * c_sr)
-            data1 = resample(data1, num_samples)
+            data1 = resample(data1, num_samples, axis=-1)
             sr1 = c_sr
         if sr2 != c_sr:
             num_samples = int(sound2.time * c_sr)
-            data2 = resample(data2, num_samples)
+            data2 = resample(data2, num_samples, axis=-1)
             sr2 = c_sr
 
     if time_align in {'none', 'noncheck'}:

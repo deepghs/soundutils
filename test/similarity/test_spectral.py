@@ -73,3 +73,27 @@ class TestSimilaritySpectral:
                 _ = sound_spectral_centroid_distance(file1, file2, time_align=time_align)
         else:
             assert sound_spectral_centroid_distance(file1, file2, time_align=time_align) == pytest.approx(v)
+
+    @pytest.mark.parametrize(['file1', 'file2', 'sr_align', 'v'], [
+        ('stereo_sine_wave.wav', 'stereo_sine_wave.wav', 'none', 0.0),
+        ('stereo_sine_wave.wav', 'stereo_sine_wave.wav', 'min', 0.0),
+        ('stereo_sine_wave.wav', 'stereo_sine_wave.wav', 'max', 0.0),
+        ('stereo_sine_wave.wav', 'stereo_sine_wave.wav', 'bullshit', ValueError),
+
+        ('stereo_sine_wave.wav', 'stereo_sine_wave_44100.wav', 'none', SoundResampleRateNotMatch),
+        ('stereo_sine_wave.wav', 'stereo_sine_wave_44100.wav', 'min', 0.0014548659720306609),
+        ('stereo_sine_wave.wav', 'stereo_sine_wave_44100.wav', 'max', 0.0013925866190809756),
+
+        ('stereo_sine_wave.wav', 'stereo_sine_wave_3x_40_900.wav', 'none', SoundResampleRateNotMatch),
+        ('stereo_sine_wave.wav', 'stereo_sine_wave_3x_40_900.wav', 'min', 20.705757783547845),
+        ('stereo_sine_wave.wav', 'stereo_sine_wave_3x_40_900.wav', 'max', 20.89222150977781),
+    ])
+    def test_sound_spectral_centroid_distance_sr_align(self, file1, file2, sr_align, v):
+        file1 = get_testfile('assets', file1)
+        file2 = get_testfile('assets', file2)
+        if isinstance(v, type) and issubclass(v, BaseException):
+            with pytest.raises(v):
+                _ = sound_spectral_centroid_distance(file1, file2, time_align='pad', resample_rate_align=sr_align)
+        else:
+            assert sound_spectral_centroid_distance(file1, file2, time_align='pad', resample_rate_align=sr_align) \
+                   == pytest.approx(v)
