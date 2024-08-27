@@ -45,16 +45,19 @@ def get_cv_list(lang):
         'kr': 'KR',
     }
 
+    mps = {}
     for key, value in d["voiceLangDict"].items():
         if value['charId'] == key and key.startswith('char_') and mt[lang] in value['dict'] and \
                 len(value['dict'][mt[lang]]['cvName']) == 1:
-            yield key, value['dict'][mt[lang]]['cvName'][0]
+            mps[key] = value['dict'][mt[lang]]['cvName'][0]
+
+    return mps
 
 
 @lru_cache()
 def get_text_for_lang(lang):
     d = get_raw_meta(lang)
-    cvmap = {key: cvname for key, cvname in get_cv_list(lang)}
+    cvmap = get_cv_list(lang)
     rows = []
     vmap = {
         'jp': 'voice',
@@ -63,11 +66,11 @@ def get_text_for_lang(lang):
         'kr': 'voice_kr',
     }
     for key, value in d["charWords"].items():
-        if value['charId'] in cvmap:
+        if value['wordKey'] not in cvmap:
             rows.append({
                 'id': key,
                 'char_id': value['charId'],
-                'voice_actor_name': cvmap[value['charId']],
+                'voice_actor_name': cvmap[value['wordKey']],
                 'char_word_id': value['charWordId'],
                 'lock_description': value['lockDescription'],
                 'place_type': value['placeType'],
