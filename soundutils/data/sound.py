@@ -48,7 +48,7 @@ class Sound:
         if sample_rate == self._sample_rate:
             return self
 
-        resampled_length = int(self.samples * (sample_rate / self._sample_rate))
+        resampled_length = int(round(self.samples * (sample_rate / self._sample_rate)))
         resampled_data = signal.resample(self._data, resampled_length)
 
         return Sound(data=resampled_data, sample_rate=sample_rate)
@@ -141,7 +141,7 @@ class Sound:
 
         ax.set_xlabel('Time [hh:mm:ss.mmm]')
         ax.set_ylabel('Amplitude')
-        ax.set_title(f'{title or "Audio Signal"}\n'
-                     f'Channels: {self.channels}, Sample Rate: {self._sample_rate}\n'
-                     f'Time: {self.time:.3f}s ({plural_word(self.samples, "frame")})\n')
+        ax.set_title(f'{title or "Audio Signal"}, '
+                     f'Channels: {self.channels}, Sample Rate: {self._sample_rate}, '
+                     f'Time: {self.time:.3f}s ({plural_word(self.samples, "frame")})')
         ax.legend()

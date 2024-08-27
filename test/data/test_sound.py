@@ -1,13 +1,13 @@
-import os
 import re
 
 import numpy as np
 import pytest
+import torch
 import torchaudio
 from hbutils.testing import isolated_directory, tmatrix
 
 from soundutils.data import Sound
-from soundutils.similarity import sound_spectral_centroid_distance
+from soundutils.similarity import sound_spectral_centroid_distance, sound_mfcc_similarity
 from ..testings import get_testfile
 
 
@@ -129,9 +129,15 @@ class TestDataSound:
     def test_resample(self, file, sample_rate):
         sound_file = get_testfile('assets', file)
         sound = Sound.open(sound_file)
+        resampler = torchaudio.transforms.Resample(sound.sample_rate, sample_rate)
+        data, _ = sound.to_numpy()
+        r_data = resampler(torch.from_numpy(data).type(torch.float32)).numpy()
+        expected_new_sound = Sound.from_numpy(r_data, sample_rate)
 
-        body, ext = os.path.splitext(file)
-        expected_sound_file = get_testfile('assets', f'{body}_sr{sample_rate}{ext}')
         new_sound = sound.resample(sample_rate)
-        new_sound.save(expected_sound_file)
-        assert sound_spectral_centroid_distance(new_sound, expected_sound_file) < 2
+        assert new_sound.sample_rate == sample_rate
+        assert sound_mfcc_similarity(
+            new_sound, expected_new_sound,
+            time_align='pad',
+            resample_rate_align='min',
+        ) >= 0.98
