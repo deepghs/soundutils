@@ -201,5 +201,5 @@ def sync(lang):
 if __name__ == '__main__':
     logging.try_init_root(logging.INFO)
     sync(
-        lang='jp',
+        lang=os.environ.get('AK_LANG', 'jp'),
     )
