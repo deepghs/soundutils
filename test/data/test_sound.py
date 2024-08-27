@@ -1,3 +1,5 @@
+import re
+
 import numpy as np
 import pytest
 import torchaudio
@@ -13,13 +15,24 @@ class TestDataSound:
         ('texas_assist.wav', 44100, 145474, 3.2987301587301587),
         ('texas_long.wav', 44100, 513927, 11.653673469387755),
     ])
-    def test_one_channel(self, file, sample_rate, samples, time_):
+    def test_1_channel(self, file, sample_rate, samples, time_):
         sound_file = get_testfile('assets', file)
         sound = Sound.open(sound_file)
         assert sound.sample_rate == sample_rate
         assert sound.samples == samples
         assert sound.time == pytest.approx(time_)
         assert sound.channels == 1
+
+    @pytest.mark.parametrize(['file', 'sample_rate', 'samples', 'time_'], [
+        ('stereo_sine_wave.wav', 16000, 32000, 2.0),
+    ])
+    def test_2_channels(self, file, sample_rate, samples, time_):
+        sound_file = get_testfile('assets', file)
+        sound = Sound.open(sound_file)
+        assert sound.sample_rate == sample_rate
+        assert sound.samples == samples
+        assert sound.time == pytest.approx(time_)
+        assert sound.channels == 2
 
     @pytest.mark.parametrize(['file'], [
         ('texas_short.wav',),
@@ -35,3 +48,16 @@ class TestDataSound:
         t_data, t_sample_rate = torchaudio.load(sound_file)
         assert sample_rate == t_sample_rate
         assert np.isclose(data, t_data.numpy(), atol=1e-5).all()
+
+    @pytest.mark.parametrize(['file', 'regex'], [
+        ('texas_short.wav', r'<Sound 0x[a-f0-9]+, channels: 1, sample_rate: 44100, length: 0.725s \(31988 frames\)>'),
+        ('texas_assist.wav', r'<Sound 0x[a-f0-9]+, channels: 1, sample_rate: 44100, length: 3.299s \(145474 frames\)>'),
+        ('texas_long.wav', r'<Sound 0x[a-f0-9]+, channels: 1, sample_rate: 44100, length: 11.654s \(513927 frames\)>'),
+        ('stereo_sine_wave.wav', r'<Sound 0x[a-f0-9]+, channels: 2, '
+                                 r'sample_rate: 16000, length: 2.000s \(32000 frames\)>'),
+    ])
+    def test_repr(self, file, regex):
+        sound_file = get_testfile('assets', file)
+        sound = Sound.open(sound_file)
+        assert re.fullmatch(regex, repr(sound)), \
+            f'Repr {sound!r} not match with pattern {regex!r}.'

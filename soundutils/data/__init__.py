@@ -1,1 +1,1 @@
-from .sound import Sound
+from .sound import Sound, SoundTyping

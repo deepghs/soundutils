@@ -1,7 +1,12 @@
-from typing import Tuple
+import os
+from typing import Tuple, Optional, Union
 
 import numpy as np
 import soundfile
+from hbutils.string import plural_word
+from scipy import signal
+
+SoundTyping = Union[str, os.PathLike, 'Sound']
 
 
 class Sound:
@@ -38,31 +43,35 @@ class Sound:
     def getchannels(self, channels):
         return self._to_numpy()[:, channels]
 
-    def to_numpy(self) -> Tuple[np.ndarray, int]:
-        return self._to_numpy().T, self._sample_rate
+    def resample(self, sample_rate) -> 'Sound':
+        if sample_rate == self._sample_rate:
+            return self
 
-    @classmethod
-    def from_numpy(cls, data: np.ndarray, sample_rate: int) -> 'Sound':
-        if len(data.shape) != 2:
-            raise ValueError(f'Invalid sound data shape - {data.shape!r}.')
+        resampled_length = int(self.samples * (sample_rate / self._sample_rate))
+        resampled_data = signal.resample(self._data, resampled_length)
 
-        data = data.T
-        if data.shape[0] == 1:
-            data = data[:, 0]
-        return cls(data, sample_rate)
+        return Sound(data=resampled_data, sample_rate=sample_rate)
 
-    @classmethod
-    def open(cls, sound_file: str) -> 'Sound':
-        data, sample_rate = soundfile.read(sound_file)
-        return cls(data, sample_rate)
+    def crop(self, start_time: Optional[str] = None, end_time: Optional[str] = None) -> 'Sound':
+        if start_time is None and end_time is None:
+            return self
 
-    def save(self, sound_file: str):
-        soundfile.write(sound_file, self._data, self._sample_rate)
+        start_sample = 0 if start_time is None else int(float(start_time) * self._sample_rate)
+        end_sample = self.samples if end_time is None else int(float(end_time) * self._sample_rate)
+
+        if start_sample < 0:
+            start_sample = 0
+        if end_sample > self.samples:
+            end_sample = self.samples
+
+        cropped_data = self._data[start_sample:end_sample]
+
+        return Sound(data=cropped_data, sample_rate=self._sample_rate)
 
     def __repr__(self):
         return f'<{self.__class__.__name__} {hex(id(self))}, ' \
-               f'samples: {self._data.shape[0]}, sample_rate: {self._sample_rate}, ' \
-               f'time: {self.time:.3f}s>'
+               f'channels: {self.channels!r}, sample_rate: {self._sample_rate}, ' \
+               f'length: {self.time:.3f}s ({plural_word(self._data.shape[0], "frame")})>'
 
     def __getitem__(self, item):
         return self.__class__(
@@ -77,3 +86,33 @@ class Sound:
                 data=sdata[:, i],
                 sample_rate=self._sample_rate,
             )
+
+    @classmethod
+    def from_numpy(cls, data: np.ndarray, sample_rate: int) -> 'Sound':
+        if len(data.shape) != 2:
+            raise ValueError(f'Invalid sound data shape - {data.shape!r}.')
+
+        data = data.T
+        if data.shape[0] == 1:
+            data = data[:, 0]
+        return cls(data, sample_rate)
+
+    def to_numpy(self) -> Tuple[np.ndarray, int]:
+        return self._to_numpy().T, self._sample_rate
+
+    @classmethod
+    def open(cls, sound_file: str) -> 'Sound':
+        data, sample_rate = soundfile.read(sound_file)
+        return cls(data, sample_rate)
+
+    def save(self, sound_file: str):
+        soundfile.write(sound_file, self._data, self._sample_rate)
+
+    @classmethod
+    def load(cls, sound: SoundTyping) -> 'Sound':
+        if isinstance(sound, Sound):
+            return sound
+        elif isinstance(sound, (str, os.PathLike)):
+            return cls.open(sound)
+        else:
+            raise TypeError(f'Unknown sound type - {sound!r}.')
