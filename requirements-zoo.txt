@@ -11,3 +11,6 @@ natsort
 tabulate
 torch
 speechbrain
+requests
+pyarrow
+pandas
