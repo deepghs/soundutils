@@ -27,7 +27,7 @@ def _align_sounds(
         sound1: SoundTyping, sound2: SoundTyping,
         resample_rate_align: Literal['max', 'min', 'none'] = 'none',
         time_align: Literal['pad', 'resample', 'none'] = 'none',
-        channels_align: Literal['none'] = 'none',
+        channels_align: Literal['none', 'noncheck'] = 'none',
 ) -> Tuple[np.ndarray, np.ndarray]:
     sound1, sound2 = Sound.load(sound1), Sound.load(sound2)
     if channels_align == 'none':
@@ -60,8 +60,8 @@ def _align_sounds(
             data2 = resample(data2, num_samples)
             sr2 = c_sr
 
-    if time_align == 'none':
-        if data1.shape[-1] != data2.shape[-1]:
+    if time_align in {'none', 'noncheck'}:
+        if time_align == 'none' and data1.shape[-1] != data2.shape[-1]:
             raise SoundLengthNotMatch('Sound length not match - '
                                       f'{data1.shape[-1] / sr1:.3f}s ({plural_word(data1.shape[-1], "frame")}) vs '
                                       f'{data2.shape[-1] / sr2:.3f}s ({plural_word(data2.shape[-1], "frame")}).')
