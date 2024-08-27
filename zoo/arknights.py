@@ -46,7 +46,8 @@ def get_cv_list(lang):
     }
 
     for key, value in d["voiceLangDict"].items():
-        if value['charId'] == key and key.startswith('char_') and mt[lang] in value['dict']:
+        if value['charId'] == key and key.startswith('char_') and mt[lang] in value['dict'] and \
+                len(value['dict'][mt[lang]]['cvName']) == 1:
             yield key, value['dict'][mt[lang]]['cvName'][0]
 
 
@@ -79,7 +80,8 @@ def get_text_for_lang(lang):
                 'voice_title': value['voiceTitle'],
                 'voice_type': value['voiceType'],
                 'word_key': value['wordKey'],
-                'file_url': f'https://torappu.prts.wiki/assets/audio/{vmap[lang]}/{value["charId"]}/{value["voiceId"].lower()}.wav',
+                'file_url': f'https://torappu.prts.wiki/assets/audio'
+                            f'/{vmap[lang]}/{value["wordKey"].replace("#", "__")}/{value["voiceId"].lower()}.wav',
             })
 
     return pd.DataFrame(rows)
