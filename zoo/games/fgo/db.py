@@ -87,8 +87,10 @@ def sync(src_repo: str = 'deepghs/fgo_voices_index', dst_repo: str = 'deepghs/fg
             for item in tqdm(df_download.to_dict('records'), desc='Adding'):
                 _, ext = os.path.splitext(urlsplit(item['file_url']).filename)
                 dst_filename = os.path.join(td, item['id'] + ext)
-                if os.path.exists(dst_filename):
-                    logging.info(f'Adding file {item["id"]!r} ...')
+                if item['id'] in exist_ids:
+                    logging.warning(f'Item {item["id"]} already exist, skipped.')
+                elif os.path.exists(dst_filename):
+                    # logging.info(f'Adding file {item["id"]!r} ...')
                     filename = item['id'] + ext
                     tar.add(dst_filename, filename)
                     mimetype, _ = mimetypes.guess_type(dst_filename)
@@ -104,6 +106,9 @@ def sync(src_repo: str = 'deepghs/fgo_voices_index', dst_repo: str = 'deepghs/fg
                         'file_size': os.path.getsize(dst_filename),
                     })
                     exist_ids.add(item['id'])
+
+                    if os.path.exists(dst_filename):
+                        os.remove(dst_filename)
                 else:
                     logging.warning(f'Voice file {item["id"]!r} not found, skipped.')
 
