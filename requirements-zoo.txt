@@ -14,3 +14,4 @@ speechbrain
 requests
 pyarrow
 pandas
+langdetect
