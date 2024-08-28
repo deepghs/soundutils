@@ -4,6 +4,7 @@ import re
 from typing import List, Optional
 from urllib.parse import quote, urljoin
 
+import langdetect
 import pandas as pd
 import requests
 from ditk import logging
@@ -11,6 +12,7 @@ from hbutils.string import plural_word
 from hbutils.system import TemporaryDirectory, urlsplit
 from hfutils.operate import get_hf_client, get_hf_fs, upload_directory_as_directory
 from hfutils.utils import get_requests_session, number_to_tag
+from langdetect import LangDetectException
 from pyquery import PyQuery as pq
 from tqdm.auto import tqdm
 
@@ -192,6 +194,15 @@ class FateGrandOrderIndexer:
                     voice_text = row('td:nth-child(2) p[lang=ja]').text().strip()
                     if not re.sub(r'\([\s\S]*\)', '', voice_text):
                         logging.warning(f'No voice text found for {name!r}/{voice_title!r}, skipped.')
+                        continue
+                    try:
+                        if langdetect.detect(voice_text) != 'ja':
+                            logging.warning(f'Voice text is not ja but {langdetect.detect(voice_text)!r} '
+                                            f'of {name!r}, skipped - {voice_text!r}.')
+                            continue
+                    except LangDetectException:
+                        logging.warning(f'Voice text language is known '
+                                        f'of {name!r}, skipped - {voice_text!r}.')
                         continue
 
                     if not row('td:nth-child(3) a[download]'):

@@ -12,6 +12,7 @@ from hbutils.string import plural_word
 from hbutils.system import urlsplit, TemporaryDirectory
 from hfutils.operate import upload_directory_as_directory, get_hf_fs, get_hf_client
 from hfutils.utils import get_requests_session, number_to_tag
+from langdetect import LangDetectException
 from pyquery import PyQuery as pq
 
 __root_website_en__ = 'https://azurlane.koumakan.jp/'
@@ -113,6 +114,8 @@ def _get_info(link_name: str, session: Optional[requests.Session] = None):
 def _get_voices(link_name: str, session: Optional[requests.Session] = None):
     session = session or get_requests_session()
     resp = session.get(f'https://azurlane.koumakan.jp/wiki/{quote_plus(link_name)}/Quotes')
+    if resp.status_code == 404:
+        return []
     resp.raise_for_status()
 
     page = pq(resp.text)
@@ -135,8 +138,13 @@ def _get_voices(link_name: str, session: Optional[requests.Session] = None):
                         if not voice_text:
                             logging.warning(f'Voice {voice_title!r} text of {link_name!r} is empty, skipped.')
                             continue
-                        if langdetect.detect(voice_text) != 'ja':
-                            logging.warning(f'Voice text is not ja but {langdetect.detect(voice_text)!r} '
+                        try:
+                            if langdetect.detect(voice_text) != 'ja':
+                                logging.warning(f'Voice text is not ja but {langdetect.detect(voice_text)!r} '
+                                                f'of {link_name!r}, skipped - {voice_text!r}.')
+                                continue
+                        except LangDetectException:
+                            logging.warning(f'Voice text language is known '
                                             f'of {link_name!r}, skipped - {voice_text!r}.')
                             continue
 
