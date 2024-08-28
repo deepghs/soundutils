@@ -312,5 +312,5 @@ if __name__ == '__main__':
     logging.try_init_root(logging.INFO)
     sync(
         repository='deepghs/fgo_voices_index',
-        maxcnt=5,
+        maxcnt=None,
     )

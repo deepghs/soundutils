@@ -235,7 +235,7 @@ def sync(lang):
             repo_id=repository,
             repo_type='dataset',
             local_directory=upload_dir,
-            path_in_repo='..',
+            path_in_repo='.',
             message=f'Sync {plural_word(len(df_rows) - original_count, "new record")} for arknights {lang} voices'
         )
 
