@@ -201,11 +201,11 @@ def sync(lang):
             print('language:', file=f)
             print(f'- {_ls.get(lang, lang)}', file=f)
             print('tags:', file=f)
-            print('- voice', file=f)
-            print('- anime', file=f)
-            print('modality:', file=f)
             print('- audio', file=f)
             print('- text', file=f)
+            print('- voice', file=f)
+            print('- anime', file=f)
+            print('- arknights', file=f)
             print('size_categories:', file=f)
             print(f'- {number_to_tag(len(df_rows))}', file=f)
             print('---', file=f)
@@ -235,7 +235,7 @@ def sync(lang):
             repo_id=repository,
             repo_type='dataset',
             local_directory=upload_dir,
-            path_in_repo='.',
+            path_in_repo='..',
             message=f'Sync {plural_word(len(df_rows) - original_count, "new record")} for arknights {lang} voices'
         )
 
