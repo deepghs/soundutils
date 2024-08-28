@@ -195,15 +195,15 @@ class FateGrandOrderIndexer:
                     if not re.sub(r'\([\s\S]*\)', '', voice_text):
                         logging.warning(f'No voice text found for {name!r}/{voice_title!r}, skipped.')
                         continue
-                    try:
-                        if langdetect.detect(voice_text) != 'ja':
-                            logging.warning(f'Voice text is not ja but {langdetect.detect(voice_text)!r} '
-                                            f'of {name!r}, skipped - {voice_text!r}.')
-                            continue
-                    except LangDetectException:
-                        logging.warning(f'Voice text language is known '
-                                        f'of {name!r}, skipped - {voice_text!r}.')
-                        continue
+                    # try:
+                    #     if langdetect.detect(voice_text) != 'ja':
+                    #         logging.warning(f'Voice text is not ja but {langdetect.detect(voice_text)!r} '
+                    #                         f'of {name!r}, skipped - {voice_text!r}.')
+                    #         continue
+                    # except LangDetectException:
+                    #     logging.warning(f'Voice text language is known '
+                    #                     f'of {name!r}, skipped - {voice_text!r}.')
+                    #     continue
 
                     if not row('td:nth-child(3) a[download]'):
                         logging.warning(f'No voice downloadable url found for {name!r}/{voice_title!r}, skipped.')

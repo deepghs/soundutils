@@ -138,15 +138,15 @@ def _get_voices(link_name: str, session: Optional[requests.Session] = None):
                         if not voice_text:
                             logging.warning(f'Voice {voice_title!r} text of {link_name!r} is empty, skipped.')
                             continue
-                        try:
-                            if langdetect.detect(voice_text) != 'ja':
-                                logging.warning(f'Voice text is not ja but {langdetect.detect(voice_text)!r} '
-                                                f'of {link_name!r}, skipped - {voice_text!r}.')
-                                continue
-                        except LangDetectException:
-                            logging.warning(f'Voice text language is known '
-                                            f'of {link_name!r}, skipped - {voice_text!r}.')
-                            continue
+                        # try:
+                        #     if langdetect.detect(voice_text) != 'ja':
+                        #         logging.warning(f'Voice text is not ja but {langdetect.detect(voice_text)!r} '
+                        #                         f'of {link_name!r}, skipped - {voice_text!r}.')
+                        #         continue
+                        # except LangDetectException:
+                        #     logging.warning(f'Voice text language is known '
+                        #                     f'of {link_name!r}, skipped - {voice_text!r}.')
+                        #     continue
 
                         if row('td:nth-child(2) a.sm2_button'):
                             file_url = urljoin(resp.url, row('td:nth-child(2) a.sm2_button').attr('href'))
