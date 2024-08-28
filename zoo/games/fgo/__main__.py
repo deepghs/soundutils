@@ -8,3 +8,4 @@ if __name__ == '__main__':
         src_repo='deepghs/fgo_voices_index',
         dst_repo='deepghs/fgo_voices_jp',
     )
+ 
