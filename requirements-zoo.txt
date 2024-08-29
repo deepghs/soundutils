@@ -16,3 +16,5 @@ pyarrow
 pandas
 langdetect
 pyquery
+onnxscript
+transformers

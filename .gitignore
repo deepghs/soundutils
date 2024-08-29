@@ -1225,3 +1225,6 @@ fabric.properties
 /YOLOv8
 .tests
 /pretrained_models
+/*.wav
+/mdist
+/onnxs
