@@ -66,6 +66,12 @@ def cli_export(repo_id: str, dst_repo_id: Optional[str], private: bool):
         with io.StringIO(meta_text) as fm:
             meta = yaml.safe_load(fm)
         meta['base_model'] = repo_id
+        if 'tags' not in meta:
+            meta['tags'] = []
+        meta['tags'].append('audio')
+        meta['tags'].append('onnx')
+        meta['tags'].append('transformers')
+        meta['library_name'] = 'transformers'
 
         with open(os.path.join(td, 'README.md'), 'w') as f:
             print('---', file=f)
