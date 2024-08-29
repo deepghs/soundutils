@@ -19,7 +19,19 @@ import logging
 from typing import Dict, List, Optional, Union
 
 import numpy as np
-from transformers.utils import PaddingStrategy
+
+from ...utils import ExplicitEnum
+
+
+class PaddingStrategy(ExplicitEnum):
+    """
+    Possible values for the `padding` argument in [`PreTrainedTokenizerBase.__call__`]. Useful for tab-completion in an
+    IDE.
+    """
+
+    LONGEST = "longest"
+    MAX_LENGTH = "max_length"
+    DO_NOT_PAD = "do_not_pad"
 
 
 class FeatureExtractionMixin:
