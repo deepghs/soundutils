@@ -24,6 +24,8 @@ def np_conv1d(input_: np.ndarray, weight: np.ndarray, bias: Optional[np.ndarray]
         if padding == 'valid':
             padding = 0
         elif padding == 'same':
+            if stride != 1:
+                raise RuntimeError(f'padding={padding} is not supported for strided convolutions')
             padding = ((kernel_width - 1) * dilation) // 2
         else:
             raise RuntimeError(f'Invalid padding string: {padding}')

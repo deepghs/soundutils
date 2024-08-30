@@ -52,6 +52,19 @@ class TestUtilsConv:
         assert np.allclose(expected, actual, atol=1e-6)
 
     @torch.no_grad()
+    def test_np_conv1d_same_re(self, kernel, t_kernel, waveform, t_waveform):
+        with pytest.raises(RuntimeError):
+            _ = torch.nn.functional.conv1d(t_waveform, t_kernel, stride=441, padding='same').numpy()
+        with pytest.raises(RuntimeError):
+            _ = np_conv1d(waveform, kernel, stride=441, padding='same')
+
+    @torch.no_grad()
+    def test_np_conv1d_same(self, kernel, t_kernel, waveform, t_waveform):
+        expected = torch.nn.functional.conv1d(t_waveform, t_kernel, padding='same').numpy()
+        actual = np_conv1d(waveform, kernel, padding='same')
+        assert np.allclose(expected, actual, atol=1e-6)
+
+    @torch.no_grad()
     def test_np_conv1d_2dim(self, kernel, t_kernel, waveform, t_waveform):
         with pytest.raises(RuntimeError):
             _ = torch.nn.functional.conv1d(t_waveform[0], t_kernel[0], stride=441).numpy()
