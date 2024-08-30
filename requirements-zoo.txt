@@ -19,3 +19,5 @@ pyquery
 onnxscript
 transformers
 click
+datasets
+evaluate

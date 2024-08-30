@@ -1,0 +1,28 @@
+python run_audio_classification.py \
+    --model_name_or_path openai/whisper-base \
+    --dataset_name common_language \
+    --output_dir whisper-base-ft-common-language-id \
+    --overwrite_output_dir \
+    --remove_unused_columns False \
+    --do_train \
+    --do_eval \
+    --fp16 \
+    --learning_rate 1e-5 \
+    --max_length_seconds 30 \
+    --attention_mask False \
+    --warmup_ratio 0.1 \
+    --num_train_epochs 10 \
+    --per_device_train_batch_size 32 \
+    --per_device_eval_batch_size 16 \
+    --gradient_checkpointing \
+    --dataloader_num_workers 4 \
+    --logging_strategy steps \
+    --logging_steps 25 \
+    --evaluation_strategy epoch \
+    --save_strategy epoch \
+    --load_best_model_at_end True \
+    --metric_for_best_model accuracy \
+    --seed 0 \
+    --freeze_feature_encoder False \
+    --label_column_name language \
+    --push_to_hub
