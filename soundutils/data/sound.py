@@ -8,7 +8,8 @@ import numpy as np
 import soundfile
 from hbutils.string import plural_word
 from matplotlib.ticker import FuncFormatter
-from scipy import signal
+
+from .resample import waveform_resample
 
 SoundTyping = Union[str, os.PathLike, 'Sound']
 
@@ -48,10 +49,9 @@ class Sound:
         if sample_rate == self._sample_rate:
             return self
 
-        resampled_length = int(round(self.samples * (sample_rate / self._sample_rate)))
-        resampled_data = signal.resample(self._data, resampled_length)
-
-        return Sound(data=resampled_data, sample_rate=sample_rate)
+        waveform, sr = self.to_numpy()
+        new_waveform = waveform_resample(waveform, orig_freq=sr, new_freq=sample_rate)
+        return self.from_numpy(new_waveform, sample_rate=sample_rate)
 
     def crop(self, start_time: Optional[float] = None, end_time: Optional[float] = None) -> 'Sound':
         if start_time is None and end_time is None:
