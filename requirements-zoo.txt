@@ -21,4 +21,4 @@ transformers
 click
 datasets
 evaluate
-pyannote
+pyannote.audio
