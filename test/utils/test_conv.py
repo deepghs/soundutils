@@ -26,6 +26,16 @@ def kernel(t_kernel):
     return t_kernel.numpy()
 
 
+@pytest.fixture()
+def t_bias(t_kernel):
+    return torch.arange(t_kernel.shape[0]).type(t_kernel.dtype)
+
+
+@pytest.fixture()
+def bias(t_bias):
+    return t_bias.numpy()
+
+
 @pytest.mark.unittest
 class TestUtilsConv:
     def test_data(self, kernel, t_kernel, waveform, t_waveform):
@@ -43,6 +53,12 @@ class TestUtilsConv:
     def test_np_conv1d(self, kernel, t_kernel, waveform, t_waveform):
         expected = torch.nn.functional.conv1d(t_waveform, t_kernel, stride=441).numpy()
         actual = np_conv1d(waveform, kernel, stride=441)
+        assert np.allclose(expected, actual, atol=1e-6)
+
+    @torch.no_grad()
+    def test_np_conv1d_bias(self, kernel, t_kernel, waveform, t_waveform, bias, t_bias):
+        expected = torch.nn.functional.conv1d(t_waveform, t_kernel, stride=441, bias=t_bias).numpy()
+        actual = np_conv1d(waveform, kernel, stride=441, bias=bias)
         assert np.allclose(expected, actual, atol=1e-6)
 
     @torch.no_grad()
