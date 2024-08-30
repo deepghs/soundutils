@@ -10,6 +10,7 @@ import torchaudio
 from pyannote.audio import Model, Inference
 
 from soundutils.data import Sound
+from soundutils.speaker import speaker_embedding
 from test.testings import get_testfile
 
 model = Model.from_pretrained(
@@ -18,20 +19,22 @@ model = Model.from_pretrained(
 )
 model.eval()
 
-sound = Sound.open(get_testfile('assets', 'texas_long.wav'))
-sound = sound.resample(16000)
-data, sr = sound.to_numpy()
-# input_ = data[None]
-input_ = torch.from_numpy(data).type(torch.float32)
+# sound = Sound.open(get_testfile('assets', 'texas_long.wav'))
+# sound = sound.resample(16000)
+# data, sr = sound.to_numpy()
+# # input_ = data[None]
+# input_ = torch.from_numpy(data).type(torch.float32)
+#
+# print(input_)
+# print(input_.dtype, input_.shape)
+#
+# with torch.no_grad():
+#     output = model(input_)
+#     # output = inf.conversion(output)
+#     print(output)
+#     print(output.dtype, output.shape)
 
-print(input_)
-print(input_.dtype, input_.shape)
-
-with torch.no_grad():
-    output = model(input_)
-    # output = inf.conversion(output)
-    print(output)
-    print(output.dtype, output.shape)
+print(speaker_embedding(get_testfile('assets', 'texas_long.wav'), resample_aligned=True))
 
 print('')
 print('--------------------------------------------------------------------')

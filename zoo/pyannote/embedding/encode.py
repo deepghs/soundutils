@@ -6,6 +6,7 @@ from pyannote.audio import Model
 from scipy.spatial.distance import cdist
 
 from soundutils.data import SoundTyping, Sound
+from soundutils.speaker import speaker_embedding
 from test.testings import get_testfile
 
 model = Model.from_pretrained(
@@ -16,14 +17,15 @@ model.eval()
 
 
 def encode(sound: SoundTyping):
-    sound = Sound.load(sound)
-    sound = sound.resample(16000)
-    data, sr = sound.to_numpy()
-    input_ = torch.from_numpy(data).type(torch.float32)
-
-    with torch.no_grad():
-        output = model(input_)
-        return output.numpy()[0]
+    return speaker_embedding(sound)
+    # sound = Sound.load(sound)
+    # sound = sound.resample(16000)
+    # data, sr = sound.to_numpy()
+    # input_ = torch.from_numpy(data).type(torch.float32)
+    #
+    # with torch.no_grad():
+    #     output = model(input_)
+    #     return output.numpy()[0]
 
 
 if __name__ == '__main__':
