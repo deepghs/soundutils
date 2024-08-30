@@ -1,11 +1,12 @@
-from typing import Optional
+from typing import Optional, Union, Literal
 
 import numpy as np
 from scipy import signal
 
 
 def np_conv1d(input_: np.ndarray, weight: np.ndarray, bias: Optional[np.ndarray] = None,
-              stride: int = 1, padding: int = 0, dilation: int = 1, groups: int = 1):
+              stride: int = 1, padding: Union[int, Literal['valid', 'same']] = 0,
+              dilation: int = 1, groups: int = 1):
     if input_.ndim < 3:
         raise RuntimeError('weight should have at least three dimensions')
 
@@ -13,7 +14,9 @@ def np_conv1d(input_: np.ndarray, weight: np.ndarray, bias: Optional[np.ndarray]
     out_channels, in_channels_per_group, kernel_width = weight.shape
 
     if in_channels % groups != 0:
-        raise ValueError("in_channels must be divisible by groups")
+        raise RuntimeError(f'Given groups={groups!r}, weight of size {weight.shape!r}, '
+                           f'expected input{input_.shape!r} to have {groups} channels, '
+                           f'but got {in_channels} channels instead')
     if out_channels % groups != 0:
         raise ValueError("out_channels must be divisible by groups")
 
@@ -23,7 +26,7 @@ def np_conv1d(input_: np.ndarray, weight: np.ndarray, bias: Optional[np.ndarray]
         elif padding == 'same':
             padding = ((kernel_width - 1) * dilation) // 2
         else:
-            raise ValueError(f"Unsupported padding type - {padding!r}.")
+            raise RuntimeError(f'Invalid padding string: {padding}')
 
     if padding > 0:
         pad_width = ((0, 0), (0, 0), (padding, padding))

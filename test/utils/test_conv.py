@@ -39,13 +39,35 @@ class TestUtilsConv:
         assert isinstance(t_kernel, torch.Tensor)
         assert t_kernel.shape == (160, 1, 475)
 
+    @torch.no_grad()
     def test_np_conv1d(self, kernel, t_kernel, waveform, t_waveform):
         expected = torch.nn.functional.conv1d(t_waveform, t_kernel, stride=441).numpy()
         actual = np_conv1d(waveform, kernel, stride=441)
         assert np.allclose(expected, actual, atol=1e-6)
 
+    @torch.no_grad()
+    def test_np_conv1d_valid(self, kernel, t_kernel, waveform, t_waveform):
+        expected = torch.nn.functional.conv1d(t_waveform, t_kernel, stride=441, padding='valid').numpy()
+        actual = np_conv1d(waveform, kernel, stride=441, padding='valid')
+        assert np.allclose(expected, actual, atol=1e-6)
+
+    @torch.no_grad()
     def test_np_conv1d_2dim(self, kernel, t_kernel, waveform, t_waveform):
         with pytest.raises(RuntimeError):
             _ = torch.nn.functional.conv1d(t_waveform[0], t_kernel[0], stride=441).numpy()
         with pytest.raises(RuntimeError):
             _ = np_conv1d(waveform[0], kernel[0], stride=441)
+
+    @torch.no_grad()
+    def test_np_conv1d_invalid_group(self, kernel, t_kernel, waveform, t_waveform):
+        with pytest.raises(RuntimeError):
+            _ = torch.nn.functional.conv1d(t_waveform, t_kernel, stride=441, groups=2).numpy()
+        with pytest.raises(RuntimeError):
+            _ = np_conv1d(waveform, kernel, stride=441, groups=2)
+
+    @torch.no_grad()
+    def test_np_conv1d_invalid_padding(self, kernel, t_kernel, waveform, t_waveform):
+        with pytest.raises(RuntimeError):
+            _ = torch.nn.functional.conv1d(t_waveform, t_kernel, stride=441, padding='invalid').numpy()
+        with pytest.raises(RuntimeError):
+            _ = np_conv1d(waveform, kernel, stride=441, padding='invalid')
