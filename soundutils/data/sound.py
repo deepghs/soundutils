@@ -53,7 +53,7 @@ class Sound:
 
         return Sound(data=resampled_data, sample_rate=sample_rate)
 
-    def crop(self, start_time: Optional[str] = None, end_time: Optional[str] = None) -> 'Sound':
+    def crop(self, start_time: Optional[float] = None, end_time: Optional[float] = None) -> 'Sound':
         if start_time is None and end_time is None:
             return self
 
@@ -68,6 +68,14 @@ class Sound:
         cropped_data = self._data[start_sample:end_sample]
 
         return Sound(data=cropped_data, sample_rate=self._sample_rate)
+
+    def to_mono(self):
+        if self.channels == 1:
+            return self
+
+        wavs = self._to_numpy()  # shape: (frames, channels)
+        new_wav = np.mean(wavs, axis=-1)[None, ...]  # (1, frame)
+        return self.from_numpy(new_wav, self.sample_rate)
 
     def __repr__(self):
         return f'<{self.__class__.__name__} {hex(id(self))}, ' \

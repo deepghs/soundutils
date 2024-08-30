@@ -21,3 +21,4 @@ transformers
 click
 datasets
 evaluate
+pyannote
