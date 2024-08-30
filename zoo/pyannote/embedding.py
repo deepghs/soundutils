@@ -16,27 +16,13 @@ model = Model.from_pretrained(
     "pyannote/embedding",
     use_auth_token=os.environ.get('HF_TOKEN')
 )
-# print(model.specifications)
+model.eval()
 
-inf = Inference(model, window="whole")
-data, sr = inf.model.audio(get_testfile('assets', 'texas_long.wav'))
-
-print(torchaudio.load(get_testfile('assets', 'texas_long.wav')))
-
-# quit()
-
-# sound = Sound.open(get_testfile('assets', 'texas_long.wav'))
-# sound = sound.resample(16000)
-# print(sound.to_numpy())
-
-quit()
-# sound = Sound.open(get_testfile('assets', 'texas_long.wav'))
-# sound = sound.resample(16000)
-# data, sr = sound.to_numpy()
-input_ = data[None]
-# input_ = torch.from_numpy(data).type(torch.float32)
-
-
+sound = Sound.open(get_testfile('assets', 'texas_long.wav'))
+sound = sound.resample(16000)
+data, sr = sound.to_numpy()
+# input_ = data[None]
+input_ = torch.from_numpy(data).type(torch.float32)
 
 print(input_)
 print(input_.dtype, input_.shape)

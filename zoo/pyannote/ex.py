@@ -12,6 +12,7 @@ model = Model.from_pretrained(
     "pyannote/embedding",
     use_auth_token=os.environ.get('HF_TOKEN')
 )
+model.eval()
 
 
 def encode(sound: SoundTyping):
