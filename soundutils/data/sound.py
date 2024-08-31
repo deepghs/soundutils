@@ -7,10 +7,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import soundfile
 from hbutils.string import plural_word
+from hbutils.system import TemporaryDirectory
 from matplotlib.ticker import FuncFormatter
 from scipy import signal
 
 from .resample import waveform_resample
+from ..utils import extract_audio_from_video
 
 SoundTyping = Union[str, os.PathLike, 'Sound']
 
@@ -159,3 +161,15 @@ class Sound:
                      f'Channels: {self.channels}, Sample Rate: {self._sample_rate}, '
                      f'Time: {self.time:.3f}s ({plural_word(self.samples, "frame")})')
         ax.legend()
+
+    @classmethod
+    def from_video(cls, video_file: str, sample_rate: Optional[int] = None, silent: bool = False) -> 'Sound':
+        with TemporaryDirectory() as td:
+            audio_file = os.path.join(td, 'audio.wav')
+            extract_audio_from_video(
+                video_path=video_file,
+                audio_file=audio_file,
+                sample_rate=sample_rate,
+                silent=silent,
+            )
+            return cls.open(audio_file)
