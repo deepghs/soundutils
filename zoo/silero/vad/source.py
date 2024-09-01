@@ -3,27 +3,18 @@ from pprint import pprint
 from typing import Callable, Optional
 
 import numpy as np
-import onnxruntime
 from huggingface_hub import hf_hub_download
 from tqdm import tqdm
 
 from soundutils.data import Sound
+from soundutils.utils import open_onnx_model
 
 languages = ['ru', 'en', 'de', 'es']
 
 
 class OnnxWrapper:
-    def __init__(self, path, force_onnx_cpu=False):
-
-        opts = onnxruntime.SessionOptions()
-        opts.inter_op_num_threads = 1
-        opts.intra_op_num_threads = 1
-
-        if force_onnx_cpu and 'CPUExecutionProvider' in onnxruntime.get_available_providers():
-            self.session = onnxruntime.InferenceSession(path, providers=['CPUExecutionProvider'], sess_options=opts)
-        else:
-            self.session = onnxruntime.InferenceSession(path, sess_options=opts)
-
+    def __init__(self, path):
+        self.session = open_onnx_model(path)
         self._state = np.zeros((2, 1, 128), dtype=np.float32)
         self._context = np.zeros(0, dtype=np.float32)
         self._last_sr = 0
