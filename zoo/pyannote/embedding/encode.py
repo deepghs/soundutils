@@ -15,8 +15,8 @@ np.set_printoptions(precision=2, suppress=True)
 if __name__ == '__main__':
     files = []
     names = []
-    dataset_dir = get_testfile('assets', 'speakers')
-    # dataset_dir = '/data/arknights_jp_nested'
+    # dataset_dir = get_testfile('assets', 'speakers')
+    dataset_dir = '/data/arknights_jp_nested'
     for name in os.listdir(dataset_dir):
         new_files = glob.glob(os.path.join(dataset_dir, name, '*.wav'))
         files.extend(new_files)
@@ -77,7 +77,7 @@ if __name__ == '__main__':
 
         # 计算每个可能的阈值的F1分数
         scores, f1s, ps, rs = [], [], [], []
-        for i, threshold in enumerate(scs):
+        for i, threshold in enumerate(tqdm(scs)):
             tp -= np.sum(pos_ranks == i)
             fp -= np.sum(neg_ranks == i)
 
