@@ -2,7 +2,6 @@ import glob
 from pprint import pprint
 
 import numpy as np
-from matplotlib import pyplot as plt
 from scipy.spatial.distance import cdist
 from tqdm import tqdm
 
@@ -38,10 +37,64 @@ if __name__ == '__main__':
     x = distance[g & msk]
     y = distance[~g]
 
-    plt.figure(figsize=(10, 6))
-    plt.boxplot([x, y], labels=['Group X', 'Group Y'])
-    plt.title('Distribution of Group X and Group Y')
-    plt.ylabel('Value')
-    plt.show()
+
+    # plt.figure(figsize=(10, 6))
+    # plt.boxplot([x, y], labels=['Group X', 'Group Y'])
+    # plt.title('Distribution of Group X and Group Y')
+    # plt.ylabel('Value')
+    # plt.show()
 
     # TODO: determine a threshold between x and y
+
+    def find_optimal_threshold(positive_scores, negative_scores, max_samples: int = 100000):
+        # 合并并排序所有分数
+        all_scores = np.concatenate([positive_scores, negative_scores])
+        all_scores.sort()
+
+        # 计算正样本和负样本的数量
+        n_pos = len(positive_scores)
+        n_neg = len(negative_scores)
+
+        # 初始化变量
+        tp = n_pos
+        fp = n_neg
+        best_f1 = 0
+        best_threshold = None
+
+        # 使用numpy的searchsorted来快速找到每个阈值对应的TP和FP
+        pos_ranks = np.searchsorted(all_scores, positive_scores, side='right')
+        neg_ranks = np.searchsorted(all_scores, negative_scores, side='right')
+
+        scs = all_scores
+
+        # 计算每个可能的阈值的F1分数
+        scores, f1s, ps, rs = [], [], [], []
+        for i, threshold in enumerate(scs):
+            tp -= np.sum(pos_ranks == i)
+            fp -= np.sum(neg_ranks == i)
+
+            precision = tp / (tp + fp) if tp + fp > 0 else 0
+            recall = tp / n_pos if n_pos > 0 else 0
+
+            f1 = 2 * (precision * recall) / (precision + recall) if precision + recall > 0 else 0
+
+            if f1 > best_f1:
+                best_f1 = f1
+                best_threshold = threshold
+            scores.append(threshold)
+            ps.append(precision)
+            rs.append(recall)
+            f1s.append(f1)
+
+        # plt.plot(scores, f1s, label='F1')
+        # plt.plot(scores, ps, label='Percentage')
+        # plt.plot(scores, rs, label='Recall')
+        # plt.legend()
+        # plt.show()
+
+        return best_threshold, best_f1
+
+
+    optimal_threshold, max_f1 = find_optimal_threshold(y, x)
+    print(f"Optimal threshold: {optimal_threshold}")
+    print(f"Max F1 score: {max_f1}")
