@@ -1,4 +1,5 @@
 import glob
+import os
 from pprint import pprint
 
 import numpy as np
@@ -13,8 +14,10 @@ np.set_printoptions(precision=2, suppress=True)
 if __name__ == '__main__':
     files = []
     names = []
-    for name in ['texas', 'kroos', 'surtr', 'mlynar', 'nian']:
-        new_files = glob.glob(get_testfile('assets', 'speakers', name, '*.wav'))
+    # dataset_dir = get_testfile('assets', 'speakers')
+    dataset_dir = '/data/arknights_jp_nested'
+    for name in os.listdir(dataset_dir):
+        new_files = glob.glob(os.path.join(dataset_dir, name, '*.wav'))
         files.extend(new_files)
         names.extend([name] * len(new_files))
     pprint(files)
