@@ -26,7 +26,6 @@ def _make_nested_dataset(src_dir, dst_dir: str):
     df = _df()
     df = df[df['filename'].isin(set(os.listdir(src_dir)))]
     print(df)
-    quit()
 
     for row in tqdm(df.to_dict('records')):
         src_file = os.path.join(src_dir, row['filename'])
