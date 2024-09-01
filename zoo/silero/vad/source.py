@@ -9,8 +9,6 @@ from tqdm import tqdm
 from soundutils.data import Sound
 from soundutils.utils import open_onnx_model
 
-languages = ['ru', 'en', 'de', 'es']
-
 
 class OnnxWrapper:
     def __init__(self, path):
@@ -103,9 +101,9 @@ def get_speech_timestamps(
 
     Parameters
     ----------
-    audio: torch.Tensor, one dimensional float torch.Tensor, other types are cast to torch if possible
+    audio: np.ndarray, one dimensional float32 numpy array.
 
-    model: preloaded .jit/.onnx silero VAD model
+    model: preloaded .onnx silero VAD model
 
     threshold: float (default - 0.5)
         Speech threshold. Silero VAD outputs speech probabilities for each audio chunk, probabilities ABOVE this value
@@ -184,7 +182,6 @@ def get_speech_timestamps(
     for current_start_sample in tqdm(range(0, audio_length_samples, window_size_samples)):
         chunk = audio[current_start_sample: current_start_sample + window_size_samples]
         if len(chunk) < window_size_samples:
-            # chunk = torch.nn.functional.pad(chunk, (0, int(window_size_samples - len(chunk))))
             chunk = np.pad(chunk, (0, int(window_size_samples - len(chunk))), mode='constant', constant_values=0)
         speech_prob = model(chunk, sampling_rate).item()
         speech_probs.append(speech_prob)
@@ -290,7 +287,9 @@ if __name__ == '__main__':
         )
     )
     waveform, sr = Sound.open('test_m.wav').to_mono().resample(16000).to_numpy()
-    # wav = torch.from_numpy(waveform.astype(np.float32))
     wav = waveform.astype(np.float32)
-    speech_timestamps = get_speech_timestamps(wav, m, sampling_rate=sr, return_seconds=True)
+    speech_timestamps = get_speech_timestamps(
+        wav, m, sampling_rate=sr,
+        return_seconds=True,
+    )
     pprint(speech_timestamps)
