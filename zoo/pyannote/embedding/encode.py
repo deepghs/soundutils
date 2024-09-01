@@ -3,6 +3,7 @@ import os
 from pprint import pprint
 
 import numpy as np
+from matplotlib import pyplot as plt
 from scipy.spatial.distance import cdist
 from tqdm import tqdm
 
@@ -14,8 +15,8 @@ np.set_printoptions(precision=2, suppress=True)
 if __name__ == '__main__':
     files = []
     names = []
-    # dataset_dir = get_testfile('assets', 'speakers')
-    dataset_dir = '/data/arknights_jp_nested'
+    dataset_dir = get_testfile('assets', 'speakers')
+    # dataset_dir = '/data/arknights_jp_nested'
     for name in os.listdir(dataset_dir):
         new_files = glob.glob(os.path.join(dataset_dir, name, '*.wav'))
         files.extend(new_files)
@@ -50,6 +51,10 @@ if __name__ == '__main__':
     # TODO: determine a threshold between x and y
 
     def find_optimal_threshold(positive_scores, negative_scores, max_samples: int = 100000):
+        if positive_scores.shape[0] > max_samples:
+            positive_scores = np.random.choice(positive_scores, size=max_samples, replace=False)
+        if negative_scores.shape[0] > max_samples:
+            negative_scores = np.random.choice(negative_scores, size=max_samples, replace=False)
         # 合并并排序所有分数
         all_scores = np.concatenate([positive_scores, negative_scores])
         all_scores.sort()
@@ -98,6 +103,6 @@ if __name__ == '__main__':
         return best_threshold, best_f1
 
 
-    optimal_threshold, max_f1 = find_optimal_threshold(y, x)
+    optimal_threshold, max_f1 = find_optimal_threshold(y, x, max_samples=100000)
     print(f"Optimal threshold: {optimal_threshold}")
     print(f"Max F1 score: {max_f1}")
