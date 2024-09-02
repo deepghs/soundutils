@@ -25,7 +25,8 @@ def _lang_group_dict_95():
 
 @lru_cache()
 def _open_model():
-    return open_onnx_model(hf_hub_download(repo_id=_REPO_ID, filename='lang_classifier_95.onnx'))
+    onnx_file = hf_hub_download(repo_id=_REPO_ID, filename='lang_classifier_95.onnx')
+    return open_onnx_model(onnx_file, mode='cpu')
 
 
 def _raw_langid(sound: SoundTyping, top_n: int = 5):

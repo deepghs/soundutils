@@ -1,1 +1,2 @@
-onnxruntime-gpu
+onnxruntime-gpu<1.18
+numpy<2

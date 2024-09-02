@@ -74,7 +74,7 @@ def _open_onnx_model(ckpt: str, provider: str, use_cpu: bool = True) -> Inferenc
         providers.append("CPUExecutionProvider")
 
     logging.info(f'Model {ckpt!r} loaded with provider {provider!r}')
-    return InferenceSession(ckpt, options, providers=providers)
+    return InferenceSession(ckpt, sess_options=options, providers=providers)
 
 
 def open_onnx_model(ckpt: str, mode: str = None) -> InferenceSession:
@@ -93,4 +93,4 @@ def open_onnx_model(ckpt: str, mode: str = None) -> InferenceSession:
         on Linux, executing ``export ONNX_MODE=cpu`` will ignore any existing CUDA and force the model inference
         to run on CPU.
     """
-    return _open_onnx_model(ckpt, get_onnx_provider(mode or os.environ.get('ONNX_MODE', None)))
+    return _open_onnx_model(ckpt, provider=get_onnx_provider(mode or os.environ.get('ONNX_MODE', None)))
