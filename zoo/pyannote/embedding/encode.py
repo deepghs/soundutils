@@ -103,6 +103,6 @@ if __name__ == '__main__':
         return best_threshold, best_f1
 
 
-    optimal_threshold, max_f1 = find_optimal_threshold(y, x, max_samples=100000)
+    optimal_threshold, max_f1 = find_optimal_threshold(y, x, max_samples=1000000)
     print(f"Optimal threshold: {optimal_threshold}")
     print(f"Max F1 score: {max_f1}")
