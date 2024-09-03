@@ -6,7 +6,7 @@ from hbutils.testing import isolated_directory
 
 from soundutils.similarity import sound_mfcc_similarity
 from soundutils.video import extract_audio_from_video
-from test.testings import get_testfile
+from ..testings import get_testfile
 
 
 @pytest.fixture()
