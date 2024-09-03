@@ -2,7 +2,7 @@ import logging
 import os
 import re
 import subprocess
-from typing import Optional
+from typing import Optional, Union
 
 from hbutils.scale import time_to_duration
 from tqdm import tqdm
@@ -10,21 +10,27 @@ from tqdm import tqdm
 from .ffmpeg import ffmpeg_cli
 
 
-def extract_audio_from_video(video_path: str, audio_file: str, sample_rate: Optional[int] = None, silent: bool = False):
+def extract_audio_from_video(
+        video_path: Union[str, os.PathLike], audio_file: Union[str, os.PathLike],
+        sample_rate: Optional[int] = None, silent: bool = False
+):
     command = [
         ffmpeg_cli(),
         '-y', '-nostdin',
-        '-i', video_path,
+        '-i', str(video_path),
         *(['-ar', str(sample_rate)] if sample_rate is not None else []),
         '-vn',
-        audio_file,
+        str(audio_file),
     ]
     logging.info(f'Extracting audio from video file with command {command!r} ...')
-    process = subprocess.Popen(
-        command,
-        stderr=subprocess.PIPE,
-        universal_newlines=True
-    )
+    with open(os.devnull, 'r') as if_, open(os.devnull, 'r') as of_:
+        process = subprocess.Popen(
+            command,
+            stdin=if_,
+            stdout=of_,
+            stderr=subprocess.PIPE,
+            universal_newlines=True
+        )
 
     duration = None
     pg, v = None, 0

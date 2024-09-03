@@ -12,7 +12,7 @@ from matplotlib.ticker import FuncFormatter
 from scipy import signal
 
 from .resample import waveform_resample
-from ..utils import extract_audio_from_video
+from ..video import extract_audio_from_video
 
 SoundTyping = Union[str, os.PathLike, 'Sound']
 
