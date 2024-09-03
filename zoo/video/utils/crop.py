@@ -11,8 +11,8 @@ def crop_video(
     ffmpeg_cmd = [
         'ffmpeg',
         '-nostdin', '-y',
-        '-i', str(video_path),
         '-ss', f'{start_time:.3f}',
+        '-i', str(video_path),
         '-t', f'{duration:.3f}',
         '-avoid_negative_ts', '1',
         '-video_track_timescale', '90000',
@@ -20,5 +20,6 @@ def crop_video(
         str(dst_video_path),
     ]
 
-    process = subprocess.run(ffmpeg_cmd, check=True)
-    process.check_returncode()
+    with open(os.devnull, 'w') as of_:
+        process = subprocess.run(ffmpeg_cmd, stdout=of_, stderr=of_, check=True)
+        process.check_returncode()
